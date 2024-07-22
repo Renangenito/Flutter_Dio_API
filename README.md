@@ -4,7 +4,7 @@
 
 ## Objetivo 🎯
 
-Este repositório serve como um exemplo prático para o artigo **"Integrando APIs em Flutter com Dio"**. Nele, você encontrará diversas abordagens e boas práticas para realizar requisições HTTP no Flutter utilizando a biblioteca Dio.
+Este repositório serve como um exemplo prático para o artigo **"Utilizando o Dio para comunicação com APIs"**. Nele, você encontrará diversas abordagens e boas práticas para realizar requisições HTTP no Flutter utilizando a biblioteca Dio.
 
 ## Exemplos Incluídos 📚
 
