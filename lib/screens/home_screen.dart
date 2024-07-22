@@ -1,25 +1,44 @@
-import 'package:flutter/material.dart';
-import 'package:dio_flutter_api/services/api_service.dart';
-import 'package:dio_flutter_api/models/post_model.dart';
 import 'package:dio_flutter_api/screens/posts_screen.dart';
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:dio_flutter_api/models/post_model.dart';
+import 'package:dio_flutter_api/providers/data_provider.dart';
 
-class HomeScreen extends StatefulWidget {
+class HomeScreen extends StatelessWidget {
   @override
-  _HomeScreenState createState() => _HomeScreenState();
-}
+  Widget build(BuildContext context) {
+    final dataProvider = Provider.of<DataProvider>(context);
 
-class _HomeScreenState extends State<HomeScreen> {
-  final ApiService _apiService = ApiService();
-  Future<Post>? _createdPostFuture;
-
-  void _getPosts() {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => PostsScreen()),
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Home'),
+      ),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            ElevatedButton(
+              onPressed: () {
+                dataProvider.fetchPosts();
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => PostsScreen()),
+                );
+              },
+              child: Text('GET'),
+            ),
+            SizedBox(height: 20),
+            ElevatedButton(
+              onPressed: () => _showPostDialog(context, dataProvider),
+              child: Text('POST'),
+            ),
+          ],
+        ),
+      ),
     );
   }
 
-  Future<void> _showPostDialog() async {
+  Future<void> _showPostDialog(BuildContext context, DataProvider dataProvider) async {
     String? title;
     String? body;
 
@@ -62,9 +81,7 @@ class _HomeScreenState extends State<HomeScreen> {
               child: Text('Enviar'),
               onPressed: () {
                 if (title != null && body != null) {
-                  setState(() {
-                    _createdPostFuture = _createPost(title!, body!);
-                  });
+                  dataProvider.createPost(Post(title: title!, body: body!));
                 }
                 Navigator.of(context).pop();
               },
@@ -72,54 +89,6 @@ class _HomeScreenState extends State<HomeScreen> {
           ],
         );
       },
-    );
-  }
-
-  Future<Post> _createPost(String title, String body) async {
-    Post newPost = Post(title: title, body: body);
-    return await _apiService.createPost(newPost);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Home'),
-      ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            ElevatedButton(
-              onPressed: _getPosts,
-              child: Text('GET'),
-            ),
-            SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: _showPostDialog,
-              child: Text('POST'),
-            ),
-            SizedBox(height: 20),
-            _createdPostFuture == null
-                ? Text('')
-                : FutureBuilder<Post>(
-                    future: _createdPostFuture,
-                    builder: (context, snapshot) {
-                      if (snapshot.connectionState == ConnectionState.waiting) {
-                        return CircularProgressIndicator();
-                      } else if (snapshot.hasError) {
-                        return Text('Error: ${snapshot.error}');
-                      } else if (snapshot.hasData) {
-                        Post post = snapshot.data!;
-                        return Text('Post criado com sucesso:\n${post.title}\n${post.body}');
-                      } else {
-                        return Text('Nenhum post criado.');
-                      }
-                    },
-                  ),
-          ],
-        ),
-      ),
     );
   }
 }
